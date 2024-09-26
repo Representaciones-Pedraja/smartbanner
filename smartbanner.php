@@ -179,4 +179,11 @@ class SmartBanner extends Module
                 'button_label' => Configuration::get('SMARTBANNER_BUTTON_LABEL'),
                 'button_url_apple' => Configuration::get('SMARTBANNER_BUTTON_URL_APPLE'),
                 'button_url_google' => Configuration::get('SMARTBANNER_BUTTON_URL_GOOGLE'),
-                'enabled_platforms' => Configuration::get('SMARTBANNER_ENABLED_PLATFORMS'
+                'enabled_platforms' => Configuration::get('SMARTBANNER_ENABLED_PLATFORMS'),
+                'close_label' => Configuration::get('SMARTBANNER_CLOSE_LABEL'),
+            ],
+        ]);
+
+        return $this->display(__FILE__, 'views/templates/front/smartbanner.tpl');
+    }
+}
