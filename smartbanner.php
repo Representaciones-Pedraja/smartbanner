@@ -85,6 +85,29 @@ class SmartBanner extends Module
 
     public function renderForm()
     {
+        $helper = new HelperForm();
+    
+        $helper->show_toolbar = false;
+        $helper->table = $this->table;
+        $helper->module = $this;
+        $helper->default_form_language = (int)Configuration::get('PS_LANG_DEFAULT');
+        $helper->allow_employee_form_lang = $helper->default_form_language;
+    
+        $helper->submit_action = 'submit_smartbanner';
+    
+        // Carga los valores actuales en el formulario
+        $helper->fields_value['SMARTBANNER_TITLE'] = Configuration::get('SMARTBANNER_TITLE');
+        $helper->fields_value['SMARTBANNER_AUTHOR'] = Configuration::get('SMARTBANNER_AUTHOR');
+        $helper->fields_value['SMARTBANNER_PRICE'] = Configuration::get('SMARTBANNER_PRICE');
+        $helper->fields_value['SMARTBANNER_ICON_APPLE'] = Configuration::get('SMARTBANNER_ICON_APPLE');
+        $helper->fields_value['SMARTBANNER_ICON_GOOGLE'] = Configuration::get('SMARTBANNER_ICON_GOOGLE');
+        $helper->fields_value['SMARTBANNER_BUTTON_LABEL'] = Configuration::get('SMARTBANNER_BUTTON_LABEL');
+        $helper->fields_value['SMARTBANNER_BUTTON_URL_APPLE'] = Configuration::get('SMARTBANNER_BUTTON_URL_APPLE');
+        $helper->fields_value['SMARTBANNER_BUTTON_URL_GOOGLE'] = Configuration::get('SMARTBANNER_BUTTON_URL_GOOGLE');
+        $helper->fields_value['SMARTBANNER_ENABLED_PLATFORMS'] = Configuration::get('SMARTBANNER_ENABLED_PLATFORMS');
+        $helper->fields_value['SMARTBANNER_CLOSE_LABEL'] = Configuration::get('SMARTBANNER_CLOSE_LABEL');
+    
+        // Definición del formulario
         $fields_form = [
             'form' => [
                 'legend' => [
@@ -148,8 +171,9 @@ class SmartBanner extends Module
                 ],
             ],
         ];
-
-        return HelperForm::generateForm([$fields_form]);
+    
+        // Generar el formulario
+        return $helper->generateForm([$fields_form]);
     }
 
     public function hookHeader($params)
