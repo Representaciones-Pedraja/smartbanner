@@ -25,7 +25,6 @@ class SmartBanner extends Module
     {
         return parent::install() &&
             $this->registerHook('displayHeader') &&
-            $this->registerHook('displayFooter') &&
             Configuration::updateValue('SMARTBANNER_TITLE', 'Smart Application') &&
             Configuration::updateValue('SMARTBANNER_AUTHOR', 'SmartBanner Contributors') &&
             Configuration::updateValue('SMARTBANNER_PRICE', 'FREE') &&
@@ -74,13 +73,11 @@ class SmartBanner extends Module
     public function renderForm()
     {
         $helper = new HelperForm();
-
         $helper->show_toolbar = false;
         $helper->table = $this->table;
         $helper->module = $this;
         $helper->default_form_language = (int)Configuration::get('PS_LANG_DEFAULT');
         $helper->allow_employee_form_lang = $helper->default_form_language;
-
         $helper->submit_action = 'submit_smartbanner';
 
         // Carga los valores actuales en el formulario
@@ -168,7 +165,7 @@ class SmartBanner extends Module
     {
         $this->context->controller->registerStylesheet('module-smartbanner', 'modules/' . $this->name . '/smartbanner.css');
         $this->context->controller->registerJavascript('module-smartbanner', 'modules/' . $this->name . '/smartbanner.js');
-        
+
         $this->context->smarty->assign([
             'smartbanner' => [
                 'title' => Configuration::get('SMARTBANNER_TITLE'),
