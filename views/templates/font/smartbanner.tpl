@@ -1,7 +1,9 @@
 {if isset($smartbanner) && $smartbanner.enabled_platforms|@explode:','|@count > 0}
-    <div id="smartbanner">
+    <div id="smartbanner" class="smartbanner">
         <div class="smartbanner-content">
-            <img src="{$smartbanner.icon_apple}" alt="{$smartbanner.title} Icon" class="smartbanner-icon" />
+            {if $smartbanner.icon_apple}
+                <img src="{$smartbanner.icon_apple}" alt="{$smartbanner.title} Icon" class="smartbanner-icon" />
+            {/if}
             <div class="smartbanner-details">
                 <h2>{$smartbanner.title}</h2>
                 <p>{$smartbanner.author} - {$smartbanner.price}</p>
