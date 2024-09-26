@@ -8,7 +8,7 @@ class SmartBanner extends Module
 {
     public function __construct()
     {
-        $this->name = 'SmartBanner';
+        $this->name = 'smartbanner';
         $this->tab = 'front_office_features';
         $this->version = '1.0.0';
         $this->author = 'Jose Manuel Pedraja';
@@ -17,7 +17,7 @@ class SmartBanner extends Module
         parent::__construct();
 
         $this->displayName = $this->l('Smart Banner');
-        $this->description = $this->l('Un módulo para mostrar un smart banner para aplicaciones móviles.');
+        $this->description = $this->l('Muestra un Smart Banner para aplicaciones móviles.');
         $this->ps_versions_compliancy = ['min' => '8.0', 'max' => _PS_VERSION_];
     }
 
@@ -30,11 +30,9 @@ class SmartBanner extends Module
             Configuration::updateValue('SMARTBANNER_PRICE', 'FREE') &&
             Configuration::updateValue('SMARTBANNER_ICON_APPLE', '') &&
             Configuration::updateValue('SMARTBANNER_ICON_GOOGLE', '') &&
-            Configuration::updateValue('SMARTBANNER_BUTTON_LABEL', 'Ver') &&
             Configuration::updateValue('SMARTBANNER_BUTTON_URL_APPLE', '') &&
             Configuration::updateValue('SMARTBANNER_BUTTON_URL_GOOGLE', '') &&
-            Configuration::updateValue('SMARTBANNER_ENABLED_PLATFORMS', 'android,ios') &&
-            Configuration::updateValue('SMARTBANNER_CLOSE_LABEL', 'Cerrar este banner');
+            Configuration::updateValue('SMARTBANNER_ENABLED_PLATFORMS', 'android,ios');
     }
 
     public function uninstall()
@@ -45,11 +43,9 @@ class SmartBanner extends Module
             Configuration::deleteByName('SMARTBANNER_PRICE') &&
             Configuration::deleteByName('SMARTBANNER_ICON_APPLE') &&
             Configuration::deleteByName('SMARTBANNER_ICON_GOOGLE') &&
-            Configuration::deleteByName('SMARTBANNER_BUTTON_LABEL') &&
             Configuration::deleteByName('SMARTBANNER_BUTTON_URL_APPLE') &&
             Configuration::deleteByName('SMARTBANNER_BUTTON_URL_GOOGLE') &&
-            Configuration::deleteByName('SMARTBANNER_ENABLED_PLATFORMS') &&
-            Configuration::deleteByName('SMARTBANNER_CLOSE_LABEL');
+            Configuration::deleteByName('SMARTBANNER_ENABLED_PLATFORMS');
     }
 
     public function getContent()
@@ -60,11 +56,9 @@ class SmartBanner extends Module
             Configuration::updateValue('SMARTBANNER_PRICE', Tools::getValue('SMARTBANNER_PRICE'));
             Configuration::updateValue('SMARTBANNER_ICON_APPLE', Tools::getValue('SMARTBANNER_ICON_APPLE'));
             Configuration::updateValue('SMARTBANNER_ICON_GOOGLE', Tools::getValue('SMARTBANNER_ICON_GOOGLE'));
-            Configuration::updateValue('SMARTBANNER_BUTTON_LABEL', Tools::getValue('SMARTBANNER_BUTTON_LABEL'));
             Configuration::updateValue('SMARTBANNER_BUTTON_URL_APPLE', Tools::getValue('SMARTBANNER_BUTTON_URL_APPLE'));
             Configuration::updateValue('SMARTBANNER_BUTTON_URL_GOOGLE', Tools::getValue('SMARTBANNER_BUTTON_URL_GOOGLE'));
             Configuration::updateValue('SMARTBANNER_ENABLED_PLATFORMS', Tools::getValue('SMARTBANNER_ENABLED_PLATFORMS'));
-            Configuration::updateValue('SMARTBANNER_CLOSE_LABEL', Tools::getValue('SMARTBANNER_CLOSE_LABEL'));
         }
 
         return $this->renderForm();
@@ -73,26 +67,24 @@ class SmartBanner extends Module
     public function renderForm()
     {
         $helper = new HelperForm();
+
         $helper->show_toolbar = false;
         $helper->table = $this->table;
         $helper->module = $this;
         $helper->default_form_language = (int)Configuration::get('PS_LANG_DEFAULT');
         $helper->allow_employee_form_lang = $helper->default_form_language;
+
         $helper->submit_action = 'submit_smartbanner';
 
-        // Carga los valores actuales en el formulario
         $helper->fields_value['SMARTBANNER_TITLE'] = Configuration::get('SMARTBANNER_TITLE');
         $helper->fields_value['SMARTBANNER_AUTHOR'] = Configuration::get('SMARTBANNER_AUTHOR');
         $helper->fields_value['SMARTBANNER_PRICE'] = Configuration::get('SMARTBANNER_PRICE');
         $helper->fields_value['SMARTBANNER_ICON_APPLE'] = Configuration::get('SMARTBANNER_ICON_APPLE');
         $helper->fields_value['SMARTBANNER_ICON_GOOGLE'] = Configuration::get('SMARTBANNER_ICON_GOOGLE');
-        $helper->fields_value['SMARTBANNER_BUTTON_LABEL'] = Configuration::get('SMARTBANNER_BUTTON_LABEL');
         $helper->fields_value['SMARTBANNER_BUTTON_URL_APPLE'] = Configuration::get('SMARTBANNER_BUTTON_URL_APPLE');
         $helper->fields_value['SMARTBANNER_BUTTON_URL_GOOGLE'] = Configuration::get('SMARTBANNER_BUTTON_URL_GOOGLE');
         $helper->fields_value['SMARTBANNER_ENABLED_PLATFORMS'] = Configuration::get('SMARTBANNER_ENABLED_PLATFORMS');
-        $helper->fields_value['SMARTBANNER_CLOSE_LABEL'] = Configuration::get('SMARTBANNER_CLOSE_LABEL');
 
-        // Definición del formulario
         $fields_form = [
             'form' => [
                 'legend' => [
@@ -127,11 +119,6 @@ class SmartBanner extends Module
                     ],
                     [
                         'type' => 'text',
-                        'label' => $this->l('Etiqueta del botón'),
-                        'name' => 'SMARTBANNER_BUTTON_LABEL',
-                    ],
-                    [
-                        'type' => 'text',
                         'label' => $this->l('URL del botón Apple'),
                         'name' => 'SMARTBANNER_BUTTON_URL_APPLE',
                     ],
@@ -145,11 +132,6 @@ class SmartBanner extends Module
                         'label' => $this->l('Plataformas habilitadas (ej: android,ios)'),
                         'name' => 'SMARTBANNER_ENABLED_PLATFORMS',
                     ],
-                    [
-                        'type' => 'text',
-                        'label' => $this->l('Etiqueta de cerrar'),
-                        'name' => 'SMARTBANNER_CLOSE_LABEL',
-                    ],
                 ],
                 'submit' => [
                     'title' => $this->l('Guardar'),
@@ -157,14 +139,27 @@ class SmartBanner extends Module
             ],
         ];
 
-        // Generar el formulario
         return $helper->generateForm([$fields_form]);
     }
 
     public function hookDisplayHeader()
     {
-        $this->context->controller->registerStylesheet('module-smartbanner', 'modules/' . $this->name . '/smartbanner.css');
-        $this->context->controller->registerJavascript('module-smartbanner', 'modules/' . $this->name . '/smartbanner.js');
+        $this->context->controller->registerStylesheet(
+            'module-smartbanner-style',
+            'modules/'.$this->name.'/views/css/smartbanner.min.css',
+            ['media' => 'all', 'priority' => 150]
+        );
+
+        $this->context->controller->registerJavascript(
+            'module-smartbanner-script',
+            'modules/'.$this->name.'/views/js/smartbanner.min.js',
+            ['position' => 'bottom', 'priority' => 150]
+        );
+        
+        $is_mobile = $this->context->isMobile();
+        if (!$is_mobile) {
+            return;
+        }
 
         $this->context->smarty->assign([
             'smartbanner' => [
@@ -173,11 +168,9 @@ class SmartBanner extends Module
                 'price' => Configuration::get('SMARTBANNER_PRICE'),
                 'icon_apple' => Configuration::get('SMARTBANNER_ICON_APPLE'),
                 'icon_google' => Configuration::get('SMARTBANNER_ICON_GOOGLE'),
-                'button_label' => Configuration::get('SMARTBANNER_BUTTON_LABEL'),
                 'button_url_apple' => Configuration::get('SMARTBANNER_BUTTON_URL_APPLE'),
                 'button_url_google' => Configuration::get('SMARTBANNER_BUTTON_URL_GOOGLE'),
                 'enabled_platforms' => Configuration::get('SMARTBANNER_ENABLED_PLATFORMS'),
-                'close_label' => Configuration::get('SMARTBANNER_CLOSE_LABEL'),
             ],
         ]);
 
