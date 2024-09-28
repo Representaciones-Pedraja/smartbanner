@@ -1,4 +1,6 @@
-
+<!DOCTYPE html>
+<html lang="es">
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="smartbanner:title" content="{$smartbanner.title}">
@@ -14,30 +16,8 @@
     <meta name="smartbanner:enabled-platforms" content="{$smartbanner.enabled_platforms}">
     <meta name="smartbanner:close-label" content="{$smartbanner.close_label}">
 
-{if isset($smartbanner)}
-    <div id="smart-banner" class="smart-banner">
-        <div class="smart-banner-content">
-            {if $smartbanner.icon_apple}
-                <img src="{$smartbanner.icon_apple}" alt="Apple Icon" class="smart-banner-icon" />
-            {/if}
-            {if $smartbanner.icon_google}
-                <img src="{$smartbanner.icon_google}" alt="Google Icon" class="smart-banner-icon" />
-            {/if}
-            <h2 class="smart-banner-title">{$smartbanner.title}</h2>
-            <p class="smart-banner-author">{$smartbanner.author}</p>
-            <p class="smart-banner-price">{$smartbanner.price}</p>
-            
-            <div id="platform-buttons">
-                <!-- Los botones se llenarán con JavaScript -->
-            </div>
-
-            <button id="close-banner" class="close-banner">Cerrar</button>
-        </div>
-    </div>
-{/if}
-
-	<style>
-			.smartbanner {
+    <style>
+		.smartbanner {
 		  position: absolute;
 		  top: 0;
 		  left: 0;
@@ -187,6 +167,30 @@
 		}
     }
 	</style>
+</head>
+<body>
+<body>
+    {if isset($smartbanner)}
+        <div id="smart-banner" class="smart-banner">
+            <div class="smart-banner-content">
+                {if $smartbanner.icon_apple}
+                    <img src="{$smartbanner.icon_apple}" alt="Apple Icon" class="smart-banner-icon" />
+                {/if}
+                {if $smartbanner.icon_google}
+                    <img src="{$smartbanner.icon_google}" alt="Google Icon" class="smart-banner-icon" />
+                {/if}
+                <h2 class="smart-banner-title">{$smartbanner.title}</h2>
+                <p class="smart-banner-author">{$smartbanner.author}</p>
+                <p class="smart-banner-price">{$smartbanner.price}</p>
+                
+                <div id="platform-buttons">
+                    <!-- Los botones se llenarán con JavaScript -->
+                </div>
+
+                <button id="close-banner" class="close-banner">Cerrar</button>
+            </div>
+        </div>
+    {/if}
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -209,6 +213,5 @@
             });
         });
     </script>
-{/if}
-
-
+</body>
+</html>
