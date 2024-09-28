@@ -1,11 +1,12 @@
 ![Tech](https://img.shields.io/badge/tech-JavaScript-brightgreen)
+![GitHub issues](https://img.shields.io/github/issues/Representaciones-Pedraja/smartbanner)
+![GitHub license](https://img.shields.io/badge/license-GNU%20GPL-blue.svg)
 [![GitHub release](https://img.shields.io/github/v/release/Representaciones-Pedraja/smartbanner)](https://github.com/Representaciones-Pedraja/smartbanner/releases)
 [![Github All Releases](https://img.shields.io/github/downloads/Representaciones-Pedraja/smartbanner/total.svg)](https://github.com/Representaciones-Pedraja/smartbanner/releases)
-![Build Status](https://img.shields.io/github/actions/workflow/status/Representaciones-Pedraja/smartbanner/Build.yml?branch=main)
 ![GitHub Repo stars](https://img.shields.io/github/stars/Representaciones-Pedraja/smartbanner?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/Representaciones-Pedraja/smartbanner?style=social)
-![GitHub license](https://img.shields.io/badge/license-GNU%20GPL-blue.svg)
-![GitHub issues](https://img.shields.io/github/issues/Representaciones-Pedraja/smartbanner)
+
+
 
 
 
