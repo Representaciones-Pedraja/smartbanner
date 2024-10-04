@@ -11,11 +11,11 @@
 
 
 # smartbanner
-Module to promote your Android or iOS App in a SmartBanner.
-##NO WORKING 100%
-#Status Project 90%
+Module to promote your Android or iOS App in a SmartBanner.<p>
+##NO WORKING 100%<p>
+#Status Project 90%<p>
 
-Based Android https://github.com/ain/smartbanner.js/tree/main
+Based Android https://github.com/ain/smartbanner.js/tree/main<p>
 Based iOS https://developer.apple.com/documentation/webkit/promoting_apps_with_smart_app_banners
 
 ![screenshot-android](https://github.com/user-attachments/assets/23b4bf9e-b12d-4a0d-b856-502a06802d18)
