@@ -12,7 +12,7 @@
 
 # smartbanner
 Module to promote your Android or iOS App in a SmartBanner.<p>
-Support Google Ads Banner insert you code google ads (NO TESTED)
+Support Google Ads Banner insert you code google ads (NO TESTED)<p>
 ##NO WORKING 100%<p>
 #Status Project 90%<p>
 
