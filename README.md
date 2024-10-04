@@ -12,6 +12,8 @@
 
 # smartbanner
 Module to promote your Android or iOS App in a SmartBanner.
+##NO WORKING 100%
+#Status Project 90%
 
 Based Android https://github.com/ain/smartbanner.js/tree/main
 Based iOS https://developer.apple.com/documentation/webkit/promoting_apps_with_smart_app_banners
@@ -19,5 +21,5 @@ Based iOS https://developer.apple.com/documentation/webkit/promoting_apps_with_s
 ![screenshot-android](https://github.com/user-attachments/assets/23b4bf9e-b12d-4a0d-b856-502a06802d18)
 ![screenshot-ios](https://github.com/user-attachments/assets/e51b5112-9992-42bf-bf2e-035920cf62f2)
 
-###NO WORKIN 100%
+
 
