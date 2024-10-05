@@ -186,3 +186,4 @@ class SmartBanner extends Module
         return $this->display(__FILE__, 'views/templates/front/smartbanner.tpl');
     }
 }
+
