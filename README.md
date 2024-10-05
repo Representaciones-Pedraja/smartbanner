@@ -12,9 +12,6 @@
 
 # smartbanner
 Module to promote your Android or iOS App in a SmartBanner.<p>
-Support Google Ads Banner insert you code google ads (NO TESTED)<p>
-## NO WORKING 100%<p>
-# Status Project 90%<p>
 
 Based Android https://github.com/ain/smartbanner.js/tree/main<p>
 Based iOS https://developer.apple.com/documentation/webkit/promoting_apps_with_smart_app_banners
