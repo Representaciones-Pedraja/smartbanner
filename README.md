@@ -16,7 +16,7 @@ Based https://github.com/ain/smartbanner.js/tree/main<p>
 
 
 ![screenshot-android](https://github.com/user-attachments/assets/23b4bf9e-b12d-4a0d-b856-502a06802d18)
-(![screenshot-ios](https://github.com/user-attachments/assets/6a58743c-4664-450f-b671-84e270ebeb04)
+![screenshot-ios](https://github.com/user-attachments/assets/6a58743c-4664-450f-b671-84e270ebeb04)
 
 BackOffice
 ![imagen](https://github.com/user-attachments/assets/cd9751e1-05d8-455b-bdcd-672421218bb1)
