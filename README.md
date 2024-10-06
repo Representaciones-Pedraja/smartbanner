@@ -1,6 +1,6 @@
 ![PrestaShop](https://img.shields.io/badge/PrestaShop-8.x-blue.svg)
 ![PHP](https://img.shields.io/badge/PHP-8.0%20%7C%208.1-8892BF.svg?style=flat-square)
-![Version](https://img.shields.io/github/v/release/Representaciones-Pedraja/smartbanner?color=blue)
+![Último Release](https://img.shields.io/github/v/release/Representaciones-Pedraja/smartbanner?include_prereleases)
 ![GitHub issues](https://img.shields.io/github/issues/Representaciones-Pedraja/smartbanner)
 ![Licencia](https://img.shields.io/github/license/Representaciones-Pedraja/smartbanner)
 ![Descargas](https://img.shields.io/github/downloads/Representaciones-Pedraja/smartbanner/total)
