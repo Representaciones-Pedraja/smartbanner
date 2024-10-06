@@ -12,12 +12,13 @@
 # SmartBanner
 Module to promote your Android or iOS App in a SmartBanner.<p>
 
-Based Android https://github.com/ain/smartbanner.js/tree/main<p>
-Based iOS https://developer.apple.com/documentation/webkit/promoting_apps_with_smart_app_banners
+Based https://github.com/ain/smartbanner.js/tree/main<p>
 
 
 ![screenshot-android](https://github.com/user-attachments/assets/23b4bf9e-b12d-4a0d-b856-502a06802d18)
-![screenshot-ios](https://github.com/user-attachments/assets/e51b5112-9992-42bf-bf2e-035920cf62f2)
+(![screenshot-ios](https://github.com/user-attachments/assets/6a58743c-4664-450f-b671-84e270ebeb04)
 
+BackOffice
+![imagen](https://github.com/user-attachments/assets/cd9751e1-05d8-455b-bdcd-672421218bb1)
 
 
