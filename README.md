@@ -2,7 +2,7 @@
 ![PHP](https://img.shields.io/badge/PHP-8.0%20%7C%208.1-8892BF.svg?style=flat-square)
 ![Version](https://img.shields.io/github/v/release/Representaciones-Pedraja/smartbanner?color=blue)
 ![GitHub issues](https://img.shields.io/github/issues/Representaciones-Pedraja/smartbanner)
-![GitHub license](https://img.shields.io/badge/license-GNU%20GPL-blue.svg)
+![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)
 [![GitHub Repo stars](https://img.shields.io/github/stars/Representaciones-Pedraja/smartbanner?style=social)](https://github.com/Representaciones-Pedraja/smartbanner/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/Representaciones-Pedraja/smartbanner?style=social)](https://github.com/Representaciones-Pedraja/smartbanner/forks)
 
