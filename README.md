@@ -9,30 +9,35 @@
 
 # SmartBanner
 
-Este módulo de PrestaShop permite promocionar tu aplicación de Android o iOS mediante un banner inteligente. Es ideal para impulsar las descargas de tu app directamente desde tu tienda en línea.
+A PrestaShop module to promote your Android or iOS app with a customizable SmartBanner, allowing easy app promotion from your online store. This module provides a back-office interface for full control over banner content, including app details, images, and links to your app on both the App Store and Google Play.
 
-## Descripción
+### Based on [smartbanner.js by ain](https://github.com/ain/smartbanner.js/tree/main)
 
-El módulo SmartBanner está diseñado para mostrar un banner promocional en tu tienda online, invitando a los usuarios a descargar tu app móvil. Basado en [smartbanner.js](https://github.com/ain/smartbanner.js/tree/main), este módulo ofrece opciones de personalización para adaptarse a tus necesidades.
-
-## Características
-
-- Compatibilidad con Android e iOS.
-- Configuración de iconos, URLs y textos personalizables.
-- Opciones para controlar el tiempo de visibilidad del banner y el comportamiento según el navegador.
-- Fácil integración y configuración desde el BackOffice de PrestaShop.
-
-## Capturas de Pantalla
-
-### Android
 ![screenshot-android](https://github.com/user-attachments/assets/23b4bf9e-b12d-4a0d-b856-502a06802d18)
-
-### iOS
 ![screenshot-ios](https://github.com/user-attachments/assets/6a58743c-4664-450f-b671-84e270ebeb04)
 
-## Documentación y Configuración
 
-Para obtener más información sobre cómo configurar y utilizar el módulo, visita nuestra [Wiki](https://github.com/Representaciones-Pedraja/smartbanner/wiki). En la Wiki, encontrarás una guía detallada sobre la configuración y personalización del módulo.
+## Installation
+
+1. Clone or download the repository into your PrestaShop `modules` directory.
+2. In the PrestaShop back office, navigate to **Modules > Module Manager**, find the SmartBanner module, and click **Install**.
+3. After installation, configure the banner under **Modules > Module Manager > Configure** for SmartBanner.
+
+## Features
+
+- Display a banner on your site promoting your mobile app.
+- Fully customizable text, images, and links.
+- Control over appearance and settings directly from PrestaShop's back office.
+- Support for both Android and iOS platforms.
+
+## Documentation
+
+Visit the [Wiki](https://github.com/Representaciones-Pedraja/smartbanner/wiki) for full documentation, including detailed configuration instructions and troubleshooting tips.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. This module is based on the [smartbanner.js project by ain](https://github.com/ain/smartbanner.js/tree/main).
+
 
 ## Instalación
 
