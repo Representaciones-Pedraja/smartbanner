@@ -26,7 +26,7 @@ class SmartBanner extends Module
 
     public function install()
     {
-        return parent::install() && $this->registerHook('displayHeader');
+        return parent::install() && $this->registerHook('displayHeader') && $this->registerHook('displayTop');
     }
 
     public function uninstall()
