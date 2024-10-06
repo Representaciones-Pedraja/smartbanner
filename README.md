@@ -30,9 +30,6 @@ El módulo SmartBanner está diseñado para mostrar un banner promocional en tu 
 ### iOS
 ![screenshot-ios](https://github.com/user-attachments/assets/6a58743c-4664-450f-b671-84e270ebeb04)
 
-### BackOffice
-![imagen](https://github.com/user-attachments/assets/cd9751e1-05d8-455b-bdcd-672421218bb1)
-
 ## Documentación y Configuración
 
 Para obtener más información sobre cómo configurar y utilizar el módulo, visita nuestra [Wiki](https://github.com/Representaciones-Pedraja/smartbanner/wiki). En la Wiki, encontrarás una guía detallada sobre la configuración y personalización del módulo.
