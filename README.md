@@ -38,10 +38,3 @@ Visit the [Wiki](https://github.com/Representaciones-Pedraja/smartbanner/wiki) f
 
 This project is licensed under the GNU - see the [LICENSE](LICENSE) file for details. This module is based on the [smartbanner.js project by ain](https://github.com/ain/smartbanner.js/tree/main).
 
-
-## Instalación
-
-1. Descarga el módulo desde [Releases](https://github.com/Representaciones-Pedraja/smartbanner/releases).
-2. Sube el módulo a tu instalación de PrestaShop.
-3. Actívalo y configúralo desde el BackOffice.
-
