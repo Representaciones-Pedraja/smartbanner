@@ -3,7 +3,7 @@
 	<name>SmartBanner</name>
 	<displayName><![CDATA[contentbox]]></displayName>
 	<version><![CDATA[1.0.0]]></version>
-	<description><![CDATA[Customisable smart app banner for iOS and Android.]]></description>
+	<description><![CDATA[Módulo SmartBanner]]></description>
 	<author><![CDATA[Jose Manuel Pedraja]]></author>
 	<tab><![CDATA[front_office_features]]></tab>
 	<confirmUninstall><![CDATA[Are you sure you want to uninstall?]]></confirmUninstall>

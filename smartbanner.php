@@ -38,7 +38,6 @@ class SmartBanner extends Module
     {
         $output = '';
         if (Tools::isSubmit('submit'.$this->name)) {
-            // Guarda cada configuración en la base de datos
             Configuration::updateValue('SMARTBANNER_TITLE', Tools::getValue('SMARTBANNER_TITLE'));
             Configuration::updateValue('SMARTBANNER_AUTHOR', Tools::getValue('SMARTBANNER_AUTHOR'));
             Configuration::updateValue('SMARTBANNER_PRICE', Tools::getValue('SMARTBANNER_PRICE'));
