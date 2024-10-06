@@ -36,7 +36,7 @@ Visit the [Wiki](https://github.com/Representaciones-Pedraja/smartbanner/wiki) f
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. This module is based on the [smartbanner.js project by ain](https://github.com/ain/smartbanner.js/tree/main).
+This project is licensed under the GNU - see the [LICENSE](LICENSE) file for details. This module is based on the [smartbanner.js project by ain](https://github.com/ain/smartbanner.js/tree/main).
 
 
 ## Instalación
