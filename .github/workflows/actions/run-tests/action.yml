@@ -1,0 +1,108 @@
+name: Run UI tests
+description: Run UI tests
+inputs:
+  base_branch:
+    description: Base branch to rebase the PR
+    required: true
+  ps_mode_dev:
+    description: Enable/Disable the developer mode
+    required: true
+  php_version:
+    description: PHP version
+    required: true
+  node_version:
+    description: Node version
+    required: true
+  test_command:
+    description: Test command to run
+    required: true
+  fast_fail:
+    description: Fast fail on first error
+    required: true
+  take_screenshot_after_each_step:
+    description: Take a screenshot after each step
+    required: true
+  ps_dir:
+    description: Directory target
+    required: true
+  DB_SERVER:
+    description: Database Type
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Use .env.ci
+      working-directory: '${{ inputs.ps_dir }}/tests/UI'
+      run: |
+        cp .env.ci .env
+        sed -i -e "s/TAKE_SCREENSHOT_AFTER_EACH_STEP.*/TAKE_SCREENSHOT_AFTER_EACH_STEP=${{ inputs.take_screenshot_after_each_step == 'false' && 'false' || 'true' }}/g" .env
+      shell: bash
+
+    - name: Run tests
+      run: |
+        export NODE_EXTRA_CA_CERTS="$(mkcert -CAROOT)/rootCA.pem"
+        npm run test:${{ inputs.test_command }}
+      working-directory: '${{ inputs.ps_dir }}/tests/UI'
+      env:
+        # Input values
+        PS_MODE_DEV: ${{ fromJson(inputs.ps_mode_dev) && '1' || '0' }}
+        PS_DEV_MODE: ${{ fromJson(inputs.ps_mode_dev) && '1' || '0' }}
+        PHP_VERSION: ${{ inputs.php_version }}
+        NODE_VERSION: ${{ inputs.node_version }}
+        VERSION: ${{ inputs.php_version }}-apache
+        PS_DOMAIN: ${{ ((inputs.base_branch == '8.0.x') || (inputs.base_branch == '1.7.8.x')) && 'localhost:8001' || 'localhost:8002' }}
+        PS_ENABLE_SSL: ${{ ((inputs.base_branch == '8.0.x') || (inputs.base_branch == '1.7.8.x')) && '0' || '1' }}
+        PS_USE_DOCKER_MAILDEV: 0
+        ADMIN_PASSWD: ${{ (inputs.base_branch == '1.7.8.x') && 'prestashop_demo' || 'Correct Horse Battery Staple' }}
+        # Fixed values
+        DB_USER: root
+        DB_PASSWD: prestashop
+        DB_NAME: prestashop
+        DB_PREFIX: tst_
+        DB_SERVER: ${{ inputs.DB_SERVER }}
+        PS_DIR: 'my_prestashop'
+        PS_FOLDER_INSTALL: install-dev
+        PS_FOLDER_ADMIN: admin-dev
+        PS_COUNTRY: fr
+        PS_LANGUAGE: en
+        ADMIN_MAIL: 'demo@prestashop.com'
+        # Test variables
+        URL_FO: ${{ ((inputs.base_branch == '8.0.x') || (inputs.base_branch == '1.7.8.x')) && 'http://localhost:8001/' || 'https://localhost:8002/' }}
+        HEADLESS: true
+        ENABLE_SSL: true
+        TAKE_SCREENSHOT_AFTER_FAIL: true
+        SMTP_SERVER: '172.17.0.1'
+        EXTRA_TEST_PARAMS: ${{ fromJson(inputs.fast_fail) && '--bail' || '' }}
+      shell: bash
+
+    # UI Tests : Upload screenshots
+    - name: Prepare screenshot name
+      id: screenshot-campaign
+      run: echo "screenshot-campaign=$( echo -e '${{ inputs.test_command }}' | tr ':' '-' )" >> $GITHUB_OUTPUT
+      if: failure()
+      shell: bash
+
+    - name: Export docker logs
+      run: |
+        mkdir -p ${{ inputs.ps_dir }}/var/docker-logs
+        docker logs my_prestashop-${{ inputs.DB_SERVER }}-1 > ${{ inputs.ps_dir }}/var/docker-logs/${{ inputs.DB_SERVER }}.log
+        docker logs my_prestashop-prestashop-git-1 > ${{ inputs.ps_dir }}/var/docker-logs/prestashop.log
+      if: failure()
+      shell: bash
+
+    - name: Export docker keycloak logs
+      run: |
+        docker logs keycloak_connector_demo-keycloak-1 > ${{ inputs.ps_dir }}/var/docker-logs/keycloak.log
+      if: failure() && inputs.test_command == 'functional:API'
+      shell: bash
+
+    - name: Export logs and screenshots as artifacts
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: campaign-${{ steps.screenshot-campaign.outputs.screenshot-campaign }}
+        path: |
+          ${{ inputs.ps_dir }}/tests/UI/screenshots/
+          ${{ inputs.ps_dir }}/var/logs
+          ${{ inputs.ps_dir }}/var/docker-logs

@@ -1,0 +1,193 @@
+name: Run UI tests with prebuilt shop
+on:
+  workflow_call:
+    inputs:
+      base_branch:
+        type: string
+        description: Base branch to rebase the PR
+        required: true
+      ps_mode_dev:
+        type: boolean
+        description: Enable/Disable the developer mode
+        required: true
+      php_version:
+        type: string
+        description: PHP version
+        required: true
+      node_version:
+        type: string
+        description: Node version
+        required: true
+      test_command:
+        type: string
+        description: Test command to run
+        required: true
+      fast_fail:
+        type: boolean
+        description: Fast fail on first error
+        required: true
+        default: false
+      take_screenshot_after_each_step:
+        type: boolean
+        description: Take a screenshot after each step
+        required: true
+        default: false
+      DB_SERVER:
+        type: string
+        description: Database Type
+        required: true
+
+jobs:
+  install-from-artifact:
+    runs-on: ubuntu-latest
+    name: Test ${{ inputs.test_command }}
+    env:
+      # Input values
+      PS_MODE_DEV: ${{ inputs.ps_mode_dev && '1' || '0' }}
+      PS_DEV_MODE: ${{ inputs.ps_mode_dev && '1' || '0' }}
+      PHP_VERSION: ${{ inputs.php_version }}
+      NODE_VERSION: ${{ inputs.node_version }}
+      VERSION: ${{ inputs.php_version }}-apache
+      PS_DOMAIN: ${{ ((inputs.base_branch == '8.0.x') || (inputs.base_branch == '1.7.8.x')) && 'localhost:8001' || 'localhost:8002' }}
+      PS_ENABLE_SSL: ${{ ((inputs.base_branch == '8.0.x') || (inputs.base_branch == '1.7.8.x')) && '0' || '1' }}
+      PS_USE_DOCKER_MAILDEV: 0
+      ADMIN_PASSWD: ${{ (inputs.base_branch == '1.7.8.x') && 'prestashop_demo' || 'Correct Horse Battery Staple' }}
+      # Fixed values
+      DB_USER: root
+      DB_PASSWD: prestashop
+      DB_NAME: prestashop
+      DB_PREFIX: tst_
+      DB_SERVER: ${{ inputs.DB_SERVER }}
+      PS_DIR: 'my_prestashop'
+      PS_FOLDER_INSTALL: install-dev
+      PS_FOLDER_ADMIN: admin-dev
+      PS_COUNTRY: fr
+      PS_LANGUAGE: en
+      ADMIN_MAIL: 'demo@prestashop.com'
+
+    steps:
+      - name: Print Inputs values
+        shell: bash
+        run: echo "${{ toJSON(inputs) }}"
+
+      # Checkout repository to use custom actions
+      - uses: actions/checkout@v4
+        with:
+          path: custom_actions
+
+      - name: Download docker artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: shop-artifacts
+          path: /tmp/shop-artifacts
+
+      - name: Extract PrestaShop sources
+        run: |
+          unzip -qq /tmp/shop-artifacts/sources.zip -d .
+
+      # Pre pull/build images
+      - name: Pull database in background
+        working-directory: ${{ env.PS_DIR }}
+        run: |
+          # Pull ${{ inputs.DB_SERVER }} image
+          USER_ID=$(id -u) GROUP_ID=$(id -g) nohup docker compose -f ${{ (inputs.DB_SERVER == 'mysql') && 'docker-compose.yml' || 'docker-compose.mariadb.yml' }} pull -q ${{ inputs.DB_SERVER }} >& /dev/null &
+
+      - name: Build PrestaShop image in background
+        working-directory: ${{ env.PS_DIR }}
+        run: |
+          # Build prestashop image in background
+          USER_ID=$(id -u) GROUP_ID=$(id -g) nohup docker compose -f ${{ (inputs.DB_SERVER == 'mysql') && 'docker-compose.yml' || 'docker-compose.mariadb.yml' }} build prestashop-git >& /dev/null &
+
+      # Certificate
+      - name: Generate a certificate
+        if: (inputs.base_branch == '8.1.x') || (inputs.base_branch == '8.2.x') || (inputs.base_branch == '9.0.x') || (inputs.base_branch == 'develop')
+        run: |
+          ## Install MkCert
+          sudo apt-get update
+          sudo apt install libnss3-tools
+          curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64"
+          chmod +x mkcert-v*-linux-amd64
+          sudo cp mkcert-v*-linux-amd64 /usr/local/bin/mkcert
+          ## Generate certificate
+          mkcert -key-file ./${{ env.PS_DIR }}/.docker/ssl.key -cert-file ./${{ env.PS_DIR }}/.docker/ssl.crt localhost
+          ## Link certificate to Chrome Trust Store
+          mkdir -p $HOME/.pki/nssdb
+          certutil -d $HOME/.pki/nssdb -N
+          certutil -d sql:$HOME/.pki/nssdb -n localhost -A -t "TCu,Cu,Tu" -i ./${{ env.PS_DIR }}/.docker/ssl.crt
+          ## Add self-signed certificate to Chrome Trust Store
+          mkcert -install
+
+      - name: Setup database
+        working-directory: ${{ env.PS_DIR }}
+        timeout-minutes: 5
+        run: |
+          echo Starting ${{ inputs.DB_SERVER }} docker alone
+          USER_ID=$(id -u) GROUP_ID=$(id -g) docker compose -f ${{ (inputs.DB_SERVER == 'mysql') && 'docker-compose.yml' || 'docker-compose.mariadb.yml' }} up -d ${{ inputs.DB_SERVER }} --build
+          echo Wait until ${{ inputs.DB_SERVER }} is accessible minimum 10 seconds before testing
+          sleep 10
+          until docker exec my_prestashop-${{ inputs.DB_SERVER }}-1 /usr/bin/${{ inputs.DB_SERVER }} -u ${{ env.DB_USER }} -p${{ env.DB_PASSWD }}; do echo "Sleep and retry to check"; sleep 2; done
+          echo Copying dump into docker
+          docker cp /tmp/shop-artifacts/db_dump.sql my_prestashop-${{ inputs.DB_SERVER }}-1:/tmp/db_dump.sql
+          echo Creating ${{ env.DB_NAME }} database
+          docker exec my_prestashop-${{ inputs.DB_SERVER }}-1 /usr/bin/${{ inputs.DB_SERVER }} -u ${{ env.DB_USER }} -p${{ env.DB_PASSWD }} -e "CREATE DATABASE IF NOT EXISTS ${{ env.DB_NAME }};"
+          echo Load dump into DB
+          docker exec my_prestashop-${{ inputs.DB_SERVER }}-1 /usr/bin/${{ inputs.DB_SERVER }} -u ${{ env.DB_USER }} -p${{ env.DB_PASSWD }} ${{ env.DB_NAME }} -e "source /tmp/db_dump.sql;"
+
+      - name: Start up shop docker
+        working-directory: ${{ env.PS_DIR }}
+        timeout-minutes: 5
+        env:
+          VERSION: ${{ (inputs.base_branch == '1.7.8.x') && inputs.php_version || env.VERSION }}
+          URL_FO: ${{ ((inputs.base_branch == '8.0.x') || (inputs.base_branch == '1.7.8.x')) && 'http://localhost:8001/' || 'https://localhost:8002/' }}
+          # No install we force the sources and load the SQL dump
+          PS_INSTALL_AUTO: 0
+          DISABLE_MAKE: 1
+        run: |
+          # First wait for all images to be ready
+          echo Check that all images are ready
+          until docker images | grep ${{ inputs.DB_SERVER }}; do echo Waiting for ${{ inputs.DB_SERVER }} image; sleep 1; done
+          until docker images | grep prestashop-git; do echo Waiting for prestashop-git image; sleep 1; done
+          echo Build the remaining dockers
+          USER_ID=$(id -u) GROUP_ID=$(id -g) docker compose -f ${{ (inputs.DB_SERVER == 'mysql') && 'docker-compose.yml' || 'docker-compose.mariadb.yml' }} up -d prestashop-git --build
+          echo Waiting for response from the FO
+          bash -c 'while [[ "$(curl -L -s -o /dev/null -w %{http_code} ${{ env.URL_FO }}en/)" != "200" ]]; do sleep 5; done'
+
+      # Keycloak is only needed for API campaign
+      - name: Launch keycloak
+        uses: ./custom_actions/.github/workflows/actions/launch-keycloak
+        if: inputs.test_command == 'functional:API' && inputs.base_branch == 'develop'
+
+      # Test dependencies are installed manually in each sub job that test the build, it could have been integrated inside the archive to reduce time here
+      # but it turns out the archive is much bigger with all this code and it makes upload/download phase so much longer that it is more efficient to install
+      # this here
+      - name: Setup Node ${{ inputs.node_version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node_version }}
+      - name: Build test dependencies
+        working-directory: ${{ env.PS_DIR }}/tests/UI
+        run: |
+          npm ci
+      # Playwright must be installed all the time, we only install chromium since it's the only browser used
+      - name: Install browsers
+        working-directory: ${{ env.PS_DIR }}/tests/UI
+        if: ${{ inputs.base_branch == '8.0.x' || inputs.base_branch == '8.1.x' || inputs.base_branch == '8.2.x' }}
+        run: npx playwright install chromium
+
+      - name: Install browsers
+        working-directory: ${{ env.PS_DIR }}/tests/UI
+        if: inputs.base_branch == 'develop'
+        run: npx playwright install chromium
+
+      - name: Run campaign ${{ inputs.test_command }} on prebuilt shop
+        uses: ./custom_actions/.github/workflows/actions/run-tests
+        with:
+          base_branch: ${{ inputs.base_branch }}
+          ps_mode_dev: ${{ inputs.ps_mode_dev }}
+          php_version: ${{ inputs.php_version }}
+          node_version: ${{ inputs.node_version }}
+          test_command: ${{ inputs.test_command }}
+          fast_fail: ${{ inputs.fast_fail }}
+          take_screenshot_after_each_step: ${{ inputs.take_screenshot_after_each_step }}
+          ps_dir: ${{ env.PS_DIR }}
+          DB_SERVER: ${{ inputs.DB_SERVER }}

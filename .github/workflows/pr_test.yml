@@ -1,0 +1,296 @@
+name: Testing PrestaShop pull requests
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Pull request Id
+        required: true
+      base_branch:
+        type: choice
+        description: Base branch to rebase the PR
+        required: true
+        options:
+          - 'develop'
+          - '9.0.x'
+          - '8.2.x'
+          - '8.1.x'
+          - '8.0.x'
+          - '1.7.8.x'
+        default: 'develop'
+      fast_fail:
+        type: boolean
+        description: Fast fail on first error
+        required: true
+        default: false
+      take_screenshot_after_each_step:
+        type: boolean
+        description: Take a screenshot after each step
+        required: true
+        default: false
+      ps_mode_dev:
+        type: boolean
+        description: Use developer mode?
+        required: true
+      rebase_or_merge:
+        type: choice
+        required: true
+        description: Rebase or merge the pull request
+        options:
+          - 'rebase'
+          - 'merge'
+        default: 'rebase'
+      php_version:
+        type: choice
+        description: PHP version
+        required: true
+        options:
+          - '7.3'
+          - '7.4'
+          - '8.0'
+          - '8.1'
+          - '8.2'
+          - '8.3'
+        default: '8.1'
+      node_version:
+        type: choice
+        description: Node version
+        required: true
+        options:
+          - '14.21.3'
+          - '16.20.1'
+          - '20.17.0'
+        default: '20.17.0'
+      DB_SERVER:
+        type: choice
+        description: Database
+        required: true
+        options:
+          - 'mysql'
+          - 'mariadb'
+        default: 'mysql'
+
+jobs:
+  # Sanity tests are run independently because it's the only campaign that handles the installation itself, since it tests it
+  sanity-test:
+    name: Sanity campaign
+    uses: ./.github/workflows/test-sanity.yml
+    with:
+      pr_number: ${{ inputs.pr_number }}
+      base_branch: ${{ inputs.base_branch }}
+      ps_mode_dev: ${{ inputs.ps_mode_dev }}
+      rebase_or_merge: ${{ inputs.rebase_or_merge }}
+      php_version: ${{ inputs.php_version }}
+      node_version: ${{ inputs.node_version }}
+      fast_fail: ${{ inputs.fast_fail }}
+      take_screenshot_after_each_step: ${{ inputs.take_screenshot_after_each_step }}
+      DB_SERVER: ${{ inputs.DB_SERVER }}
+
+  # We perform a unique build that is stored as an artifact, only then do we start the campaign that will rely on this build
+  build-shop:
+    name: Prebuild shop and export artifacts
+    uses: ./.github/workflows/build-shop.yml
+    with:
+      pr_number: ${{ inputs.pr_number }}
+      base_branch: ${{ inputs.base_branch }}
+      ps_mode_dev: ${{ inputs.ps_mode_dev }}
+      rebase_or_merge: ${{ inputs.rebase_or_merge }}
+      php_version: ${{ inputs.php_version }}
+      node_version: ${{ inputs.node_version }}
+      DB_SERVER: ${{ inputs.DB_SERVER }}
+
+  # These campaigns are run first because they are longer, so we try to optimize the total run However this list must not
+  # be too long or too many runners will be blocked by these campaigns and the split would be counter-productive, it's a
+  # delicate balance to maintain The criteria so far was campaign longer than 15min
+  test-long-campaigns:
+    name: Long ${{ matrix.TEST_COMMAND }}
+    needs: build-shop
+    uses: ./.github/workflows/test-with-prebuilt-shop.yml
+    with:
+      base_branch: ${{ inputs.base_branch }}
+      ps_mode_dev: ${{ inputs.ps_mode_dev }}
+      php_version: ${{ inputs.php_version }}
+      node_version: ${{ inputs.node_version }}
+      test_command: ${{ matrix.TEST_COMMAND }}
+      fast_fail: ${{ inputs.fast_fail }}
+      take_screenshot_after_each_step: ${{ inputs.take_screenshot_after_each_step }}
+      DB_SERVER: ${{ inputs.DB_SERVER }}
+    strategy:
+      fail-fast: false
+      matrix:
+        TEST_COMMAND:
+          - 'functional:BO:advanced-parameters:07-10'
+          - 'functional:BO:catalog:01-02'
+          - 'functional:BO:catalog:03-04'
+          - 'functional:BO:catalog:07-08'
+          - 'functional:BO:design'
+          - 'functional:BO:header'
+          - 'functional:BO:orders:01-view-and-edit-order'
+          - 'functional:BO:orders:03-05'
+          - 'functional:BO:shop-parameters:01-02'
+          - 'functional:BO:shop-parameters:03-04'
+          - 'functional:FO:classic:01-03'
+          - 'functional:FO:classic:08-12'
+          - 'functional:FO:hummingbird:01-03'
+          - 'functional:FO:hummingbird:08-12'
+          - 'modules'
+        BASE_BRANCH:
+          - ${{ inputs.base_branch }}
+        exclude:
+          ## 1.7.8.x
+          - BASE_BRANCH: 1.7.8.x
+            TEST_COMMAND: 'functional:FO:classic:01-03'
+          - BASE_BRANCH: 1.7.8.x
+            TEST_COMMAND: 'functional:FO:classic:08-12'
+          - BASE_BRANCH: 1.7.8.x
+            TEST_COMMAND: 'functional:FO:hummingbird:01-03'
+          - BASE_BRANCH: 1.7.8.x
+            TEST_COMMAND: 'functional:FO:hummingbird:08-12'
+          - BASE_BRANCH: 1.7.8.x
+            TEST_COMMAND: 'modules'
+          ## 8.0.x
+          - BASE_BRANCH: 8.0.x
+            TEST_COMMAND: 'functional:FO:classic:01-03'
+          - BASE_BRANCH: 8.0.x
+            TEST_COMMAND: 'functional:FO:classic:08-12'
+          - BASE_BRANCH: 8.0.x
+            TEST_COMMAND: 'functional:FO:hummingbird:01-03'
+          - BASE_BRANCH: 8.0.x
+            TEST_COMMAND: 'functional:FO:hummingbird:08-12'
+          - BASE_BRANCH: 8.0.x
+            TEST_COMMAND: 'modules'
+          ## 8.1.x
+          - BASE_BRANCH: 8.1.x
+            TEST_COMMAND: 'functional:FO:hummingbird:08-12'
+          ## 8.2.x
+          - BASE_BRANCH: 8.2.x
+            TEST_COMMAND: 'functional:FO:hummingbird:08-12'
+
+  test-short-campaigns:
+    name: Run short campaign ${{ matrix.TEST_COMMAND }}
+    needs: build-shop
+    uses: ./.github/workflows/test-with-prebuilt-shop.yml
+    with:
+      base_branch: ${{ inputs.base_branch }}
+      ps_mode_dev: ${{ inputs.ps_mode_dev }}
+      php_version: ${{ inputs.php_version }}
+      node_version: ${{ inputs.node_version }}
+      test_command: ${{ matrix.TEST_COMMAND }}
+      fast_fail: ${{ inputs.fast_fail }}
+      take_screenshot_after_each_step: ${{ inputs.take_screenshot_after_each_step }}
+      DB_SERVER: ${{ inputs.DB_SERVER }}
+    strategy:
+      fail-fast: false
+      matrix:
+        TEST_COMMAND:
+          - 'cldr'
+          - 'functional:API'
+          - 'functional:BO:login'
+          - 'functional:BO:dashboard'
+          - 'functional:BO:advanced-parameters:01-06'
+          - 'functional:BO:advanced-parameters:11-12'
+          - 'functional:BO:catalog:05-06'
+          - 'functional:BO:customer:01'
+          - 'functional:BO:customer:02-03'
+          - 'functional:BO:customer-service'
+          - 'functional:BO:international:01'
+          - 'functional:BO:international:02'
+          - 'functional:BO:international:03-04'
+          - 'functional:BO:modules'
+          - 'functional:BO:orders:01:0-1'
+          - 'functional:BO:orders:01-create-orders'
+          - 'functional:BO:orders:02'
+          - 'functional:BO:shop-parameters:05-07'
+          - 'functional:BO:payment'
+          - 'functional:BO:shipping'
+          - 'functional:FO:01-03'
+          - 'functional:FO:04-07'
+          - 'functional:FO:08-12'
+          - 'functional:FO:classic:04-07'
+          - 'functional:FO:hummingbird:04-07'
+          - 'functional:productV2'
+          - 'functional:WS'
+          - 'regression'
+          - 'sanity:productV2'
+        BASE_BRANCH:
+          - ${{ inputs.base_branch }}
+        exclude:
+          ## 1.7.8.x
+          - BASE_BRANCH: 1.7.8.x
+            TEST_COMMAND: 'cldr'
+          - BASE_BRANCH: 1.7.8.x
+            TEST_COMMAND: 'functional:BO:advanced-parameters:11-12'
+          - BASE_BRANCH: 1.7.8.x
+            TEST_COMMAND: 'functional:BO:dashboard'
+          - BASE_BRANCH: 1.7.8.x
+            TEST_COMMAND: 'functional:productV2'
+          - BASE_BRANCH: 1.7.8.x
+            TEST_COMMAND: 'functional:API'
+          - BASE_BRANCH: 1.7.8.x
+            TEST_COMMAND: 'functional:FO:classic:04-07'
+          - BASE_BRANCH: 1.7.8.x
+            TEST_COMMAND: 'functional:FO:hummingbird:04-07'
+          - BASE_BRANCH: 1.7.8.x
+            TEST_COMMAND: 'functional:WS'
+          - BASE_BRANCH: 1.7.8.x
+            TEST_COMMAND: 'sanity:productV2'
+          ## 8.0.x
+          - BASE_BRANCH: 8.0.x
+            TEST_COMMAND: 'cldr'
+          - BASE_BRANCH: 8.0.x
+            TEST_COMMAND: 'functional:BO:advanced-parameters:11-12'
+          - BASE_BRANCH: 8.0.x
+            TEST_COMMAND: 'functional:BO:dashboard'
+          - BASE_BRANCH: 8.0.x
+            TEST_COMMAND: 'functional:productV2'
+          - BASE_BRANCH: 8.0.x
+            TEST_COMMAND: 'functional:API'
+          - BASE_BRANCH: 8.0.x
+            TEST_COMMAND: 'functional:FO:classic:04-07'
+          - BASE_BRANCH: 8.0.x
+            TEST_COMMAND: 'functional:FO:hummingbird:04-07'
+          - BASE_BRANCH: 8.0.x
+            TEST_COMMAND: 'functional:WS'
+          ## 8.1.x
+          - BASE_BRANCH: 8.1.x
+            TEST_COMMAND: 'functional:BO:advanced-parameters:11-12'
+          - BASE_BRANCH: 8.1.x
+            TEST_COMMAND: 'functional:FO:01-03'
+          - BASE_BRANCH: 8.1.x
+            TEST_COMMAND: 'functional:FO:04-07'
+          - BASE_BRANCH: 8.1.x
+            TEST_COMMAND: 'functional:FO:08-12'
+          - BASE_BRANCH: 8.1.x
+            TEST_COMMAND: 'functional:FO:hummingbird:04-07'
+          ## 8.2.x
+          - BASE_BRANCH: 8.2.x
+            TEST_COMMAND: 'functional:BO:advanced-parameters:11-12'
+          - BASE_BRANCH: 8.2.x
+            TEST_COMMAND: 'functional:FO:01-03'
+          - BASE_BRANCH: 8.2.x
+            TEST_COMMAND: 'functional:FO:04-07'
+          - BASE_BRANCH: 8.2.x
+            TEST_COMMAND: 'functional:FO:08-12'
+          - BASE_BRANCH: 8.2.x
+            TEST_COMMAND: 'functional:FO:hummingbird:04-07'
+          ## 9.0.x
+          - BASE_BRANCH: 9.0.x
+            TEST_COMMAND: 'functional:FO:01-03'
+          - BASE_BRANCH: 9.0.x
+            TEST_COMMAND: 'functional:FO:04-07'
+          - BASE_BRANCH: 9.0.x
+            TEST_COMMAND: 'functional:FO:08-12'
+          - BASE_BRANCH: 9.0.x
+            TEST_COMMAND: 'functional:productV2'
+          - BASE_BRANCH: 9.0.x
+            TEST_COMMAND: 'sanity:productV2'
+          ## develop
+          - BASE_BRANCH: develop
+            TEST_COMMAND: 'functional:FO:01-03'
+          - BASE_BRANCH: develop
+            TEST_COMMAND: 'functional:FO:04-07'
+          - BASE_BRANCH: develop
+            TEST_COMMAND: 'functional:FO:08-12'
+          - BASE_BRANCH: develop
+            TEST_COMMAND: 'functional:productV2'
+          - BASE_BRANCH: develop
+            TEST_COMMAND: 'sanity:productV2'
